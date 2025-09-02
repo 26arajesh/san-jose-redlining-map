@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>HOLC — auto-detect layer (MapTiler)</title>
+  <title>HOLC — interactive (stacked broadband & improved parsing)</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <link href="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.js"></script>
@@ -17,161 +17,381 @@
     .legend { position:absolute; right:12px; top:72px; background:#fff; padding:10px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.12); z-index:2; font-size:13px; }
     .swatch { width:18px; height:12px; border-radius:2px; border:1px solid rgba(0,0,0,0.08); display:inline-block; margin-right:8px; vertical-align:middle; }
     .legend .row { margin-bottom:6px; }
+    .popup-table { font-size:13px; line-height:1.3; max-width:340px; }
+    .popup-scroll { max-height:300px; overflow:auto; padding-right:8px; box-sizing:border-box; }
+    .metric { font-weight:600; margin-right:6px; }
+    .chart-title { font-weight:700; margin-bottom:6px; }
+    .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .bar-label { width:160px; font-size:13px; }
+    .bar-track { background:#eee; height:18px; width:420px; border-radius:4px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:4px; }
+    .small-note { font-size:12px; color:#666; margin-top:6px; }
+    .stat-grid { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:18px; }
+    .stat-card { min-width:160px; background:#fafafa; padding:10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
   </style>
 </head>
 <body>
-  <div class="tabs">
-    <div id="tab-map" class="tab active">Map</div>
-    <div id="tab-graphs" class="tab">Graphs & Info</div>
+<div class="tabs">
+  <div id="tab-map" class="tab active">Map</div>
+  <div id="tab-graphs" class="tab">Graphs & Info</div>
+</div>
+
+<div id="map"></div>
+
+<div id="graphs">
+  <h2 id="graphs-title">Select a polygon to view charts</h2>
+  <div id="graphs-content">
+    <p>Click a HOLC polygon on the map to populate these graphs and metrics.</p>
   </div>
+</div>
 
-  <div id="map"></div>
-  <div id="graphs"><h2>Graphs & policy text</h2><p>Drop your charts or narrative here.</p></div>
+<div id="info">Hover a polygon</div>
 
-  <div id="info">Hover a polygon</div>
-
-  <div class="legend" aria-hidden="true">
-    <div style="font-weight:600; margin-bottom:6px;">HOLC grade</div>
-    <div class="row"><span class="swatch" style="background:#2ca25f"></span>A</div>
-    <div class="row"><span class="swatch" style="background:#1f78b4"></span>B</div>
-    <div class="row"><span class="swatch" style="background:#f1c40f"></span>C</div>
-    <div class="row"><span class="swatch" style="background:#e34a33"></span>D</div>
-    <div class="row"><span class="swatch" style="background:#999999"></span>Other</div>
-  </div>
+<div class="legend" id="legend">
+  <div style="font-weight:600; margin-bottom:6px;">HOLC grade</div>
+  <div class="row"><span class="swatch" style="background:#2ca25f"></span>A</div>
+  <div class="row"><span class="swatch" style="background:#1f78b4"></span>B</div>
+  <div class="row"><span class="swatch" style="background:#f1c40f"></span>C</div>
+  <div class="row"><span class="swatch" style="background:#e34a33"></span>D</div>
+  <div class="row"><span class="swatch" style="background:#999999"></span>Other</div>
+</div>
 
 <script>
-// ========== TileJSON URL ==========
-const TILEJSON_URL = "https://api.maptiler.com/tiles/01990763-49f0-77ce-b1b1-b97328f38e70/tiles.json?key=PrTVbrUk3PBatpAWhyvh";
+  /* ===== CONFIG ===== */
+  const TILEJSON_URL = "https://api.maptiler.com/tiles/01990763-49f0-77ce-b1b1-b97328f38e70/tiles.json?key=PrTVbrUk3PBatpAWhyvh";
 
-// UI for tabs
-const tabMap = document.getElementById('tab-map');
-const tabGraphs = document.getElementById('tab-graphs');
-const mapEl = document.getElementById('map');
-const graphsEl = document.getElementById('graphs');
+  /* ===== UI shortcuts ===== */
+  const tabMap = document.getElementById('tab-map');
+  const tabGraphs = document.getElementById('tab-graphs');
+  const mapEl = document.getElementById('map');
+  const graphsEl = document.getElementById('graphs');
+  const infoBox = document.getElementById('info');
+  const legendEl = document.getElementById('legend');
 
-tabMap.onclick = () => { tabMap.classList.add('active'); tabGraphs.classList.remove('active'); mapEl.style.display='block'; graphsEl.style.display='none'; if (window._map) window._map.resize(); }
-tabGraphs.onclick = () => { tabGraphs.classList.add('active'); tabMap.classList.remove('active'); mapEl.style.display='none'; graphsEl.style.display='block'; }
-
-// Async init: fetch TileJSON, detect vector layer(s), and create map
-async function init() {
-  let tj;
-  try {
-    const r = await fetch(TILEJSON_URL);
-    if (!r.ok) throw new Error(`TileJSON fetch failed: ${r.status} ${r.statusText}`);
-    tj = await r.json();
-  } catch (err) {
-    alert("Failed to fetch TileJSON. Check the TileJSON URL and API key. See console for details.");
-    console.error(err);
-    return;
-  }
-
-  console.log("TileJSON loaded:", tj);
-
-  // detect layer name
-  let sourceLayer = null;
-  if (Array.isArray(tj.vector_layers) && tj.vector_layers.length > 0) {
-    sourceLayer = tj.vector_layers[0].id;
-    console.log("Detected vector_layers:", tj.vector_layers.map(v=>v.id));
-  } else if (Array.isArray(tj.layers) && tj.layers.length > 0) {
-    sourceLayer = tj.layers[0].id;
-    console.log("Detected layers:", tj.layers.map(v=>v.id));
-  } else {
-    console.warn("No vector_layers found in TileJSON. Upload may not have created vector layers.");
-  }
-
-  // style with TileJSON and zoom bounds
-  const style = {
-    version: 8,
-    sources: {
-      "osm": { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256 },
-      "holc-tiles": { type: "vector", url: TILEJSON_URL, minzoom: tj.minzoom || 0, maxzoom: tj.maxzoom || 14 }
-    },
-    layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+  tabMap.onclick = () => {
+    tabMap.classList.add('active'); tabGraphs.classList.remove('active');
+    mapEl.style.display='block'; graphsEl.style.display='none';
+    infoBox.style.display = 'block';
+    legendEl.style.display = 'block';
+    if (window._map) window._map.resize();
+  };
+  tabGraphs.onclick = () => {
+    tabGraphs.classList.add('active'); tabMap.classList.remove('active');
+    mapEl.style.display='none'; graphsEl.style.display='block';
+    infoBox.style.display = 'none';
+    legendEl.style.display = 'none';
   };
 
-  const map = new maplibregl.Map({
-    container: 'map',
-    style: style,
-    center: [-121.8863, 37.3382], // San Jose center — change if desired
-    zoom: 12
-  });
-  window._map = map; // for external access
+  /* ===== Flexible key matching & parsing (with exclude option) ===== */
+  function findKeyBySubstrings(props, substrings, excludeSubstrings=[]) {
+    if (!props) return null;
+    const keys = Object.keys(props);
+    const low = substrings.map(s => s.toLowerCase());
+    const excl = excludeSubstrings.map(s => s.toLowerCase());
+    // exact equality first
+    for (const k of keys) {
+      const kl = k.toLowerCase();
+      if (excl.some(e => kl.includes(e))) continue;
+      for (const s of low) { if (kl === s) return k; }
+    }
+    // substring match next
+    for (const k of keys) {
+      const kl = k.toLowerCase();
+      if (excl.some(e => kl.includes(e))) continue;
+      for (const s of low) { if (kl.includes(s)) return k; }
+    }
+    return null;
+  }
+  function getPropFlexible(props, substrings, fallbackCandidates=[]) {
+    if (!props) return null;
+    // fallback exact keys first
+    for (const c of fallbackCandidates) {
+      if (c in props) return props[c];
+    }
+    const k = findKeyBySubstrings(props, substrings);
+    return k ? props[k] : null;
+  }
+  function parseNumberFlexible(v) {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    const s = String(v).trim();
+    if (s === '' || s.toLowerCase() === 'null' || s.toLowerCase() === 'nan') return null;
+    // percent string
+    if (s.includes('%')) {
+      const n = Number(s.replace(/[%\s,]/g,''));
+      return Number.isFinite(n) ? n : null;
+    }
+    // numeric with commas/currency
+    if (/^\$|,/.test(s) || /^\d[\d,]*$/.test(s.replace(/\s/g,''))) {
+      const n = Number(s.replace(/[$,\s]/g,''));
+      return Number.isFinite(n) ? n : null;
+    }
+    // decimal fraction 0.0-1.0 treat as fraction
+    const n = Number(s.replace(/[,]/g,''));
+    if (!Number.isFinite(n)) return null;
+    if (n > 0 && n <= 1) return n * 100;
+    return n;
+  }
+  function clampPct(n) {
+    if (n === null || n === undefined || isNaN(n)) return null;
+    const v = Number(n);
+    if (v > 0 && v <= 1) return v * 100;
+    return Math.max(0, Math.min(100, v));
+  }
+  function formatNumber(n) {
+    if (n === null || n === undefined || isNaN(n)) return 'N/A';
+    return Number(n).toLocaleString(undefined, {maximumFractionDigits:0});
+  }
 
-  map.on('load', () => {
-    if (!sourceLayer) {
-      document.getElementById('info').innerText = "No vector_layers found in TileJSON. Check your MapTiler upload.";
+  /* small UI bar helpers */
+  function miniInlineBar(label, pct, color) {
+    const p = pct === null ? 0 : Math.max(0, Math.min(100, Number(pct)));
+    return `<div style="display:flex;align-items:center;margin:4px 0;">
+    <div style="width:120px;font-size:12px">${label}</div>
+    <div style="background:#eee;width:160px;height:10px;border-radius:4px;overflow:hidden;margin-left:8px">
+      <div style="width:${p}%;height:100%;background:${color};"></div>
+    </div>
+    <div style="min-width:46px;text-align:right;margin-left:8px;font-size:12px">${p.toFixed(1)}%</div>
+  </div>`;
+  }
+  function largeBarRow(label, pct, color) {
+    const p = pct === null ? 0 : Math.max(0, Math.min(100, Number(pct)));
+    return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track" role="img" aria-label="${label} ${p.toFixed(1)}%">
+      <div class="bar-fill" style="width:${p}%;background:${color}"></div>
+    </div>
+    <div style="min-width:56px;text-align:right;font-weight:600">${p.toFixed(1)}%</div>
+  </div>`;
+  }
+  /* stacked single bar (normalize to sum if > 0) */
+  function stackedSingleBarHtml(served, underserved, priority, widthPx=420) {
+    // convert possible nulls to 0 for layout; but decide whether to show N/A labels later
+    const s = served !== null ? Number(served) : 0;
+    const u = underserved !== null ? Number(underserved) : 0;
+    const p = priority !== null ? Number(priority) : 0;
+    const sum = s + u + p;
+    // if sum is 0, fallback to 0 widths
+    const ws = sum > 0 ? (s / sum) * 100 : 0;
+    const wu = sum > 0 ? (u / sum) * 100 : 0;
+    const wp = sum > 0 ? (p / sum) * 100 : 0;
+    const label = `${s.toFixed(1)}% served • ${u.toFixed(1)}% underserved • ${p.toFixed(1)}% priority`;
+    return `
+    <div style="display:flex;align-items:center;gap:12px;margin:8px 0;">
+      <div style="width:160px">Broadband</div>
+      <div style="background:#eee;width:${widthPx}px;height:18px;border-radius:4px;overflow:hidden;display:flex">
+        <div style="width:${ws}%;background:#2ca25f;height:100%"></div>
+        <div style="width:${wu}%;background:#f1c40f;height:100%"></div>
+        <div style="width:${wp}%;background:#e34a33;height:100%"></div>
+      </div>
+      <div style="min-width:140px;text-align:right">${label}</div>
+    </div>
+  `;
+  }
+
+  /* ===== Map init & logic ===== */
+  async function init() {
+    let tj;
+    try {
+      const r = await fetch(TILEJSON_URL);
+      if (!r.ok) throw new Error(`TileJSON fetch failed: ${r.status} ${r.statusText}`);
+      tj = await r.json();
+    } catch (err) {
+      alert("Failed to fetch TileJSON. Check TileJSON URL and API key. See console.");
+      console.error(err);
       return;
     }
-    console.log("Using source-layer:", sourceLayer);
 
-    // Add polygon fill and outline with your color scheme:
-    // A -> green, B -> blue, C -> yellow, D -> red, default gray
-    map.addLayer({
-      id: 'holc-fill',
-      type: 'fill',
-      source: 'holc-tiles',
-      'source-layer': sourceLayer,
-      paint: {
-        'fill-color': [
-          'match',
-          ['get', 'grade'],
-          'A', '#2ca25f',     // green
-          'B', '#1f78b4',     // blue
-          'C', '#f1c40f',     // yellow
-          'D', '#e34a33',     // red
-          /*default*/ '#999999' // grey for anything else / missing
-        ],
-        'fill-opacity': 0.65
+    // detect layer name
+    let sourceLayer = null;
+    if (Array.isArray(tj.vector_layers) && tj.vector_layers.length > 0) {
+      sourceLayer = tj.vector_layers[0].id;
+      console.log('vector_layers', tj.vector_layers.map(v=>v.id));
+    } else if (Array.isArray(tj.layers) && tj.layers.length > 0) {
+      sourceLayer = tj.layers[0].id;
+      console.log('layers', tj.layers.map(v=>v.id));
+    } else {
+      console.warn('No vector_layers in TileJSON.');
+    }
+
+    const style = {
+      version: 8,
+      sources: {
+        "osm": { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256 },
+        "holc-tiles": { type: "vector", url: TILEJSON_URL, minzoom: tj.minzoom || 0, maxzoom: tj.maxzoom || 14 }
+      },
+      layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+    };
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style,
+      center: [-121.8863, 37.3382],
+      zoom: 12
+    });
+    window._map = map;
+
+    map.on('load', () => {
+      if (!sourceLayer) {
+        document.getElementById('info').innerText = "No vector_layers found in TileJSON. Check upload.";
+        return;
       }
+
+      map.addLayer({
+        id: 'holc-fill',
+        type: 'fill',
+        source: 'holc-tiles',
+        'source-layer': sourceLayer,
+        paint: {
+          'fill-color': [
+            'match',
+            ['get','grade'],
+            'A','#2ca25f','B','#1f78b4','C','#f1c40f','D','#e34a33',
+            '#999999'
+          ],
+          'fill-opacity': 0.65
+        }
+      });
+
+      map.addLayer({
+        id: 'holc-line',
+        type: 'line',
+        source: 'holc-tiles',
+        'source-layer': sourceLayer,
+        paint: { 'line-color': '#222', 'line-width': 1 }
+      });
+
+      const popup = new maplibregl.Popup({ closeButton:true, closeOnClick:true, maxWidth: '380px' });
+
+      map.on('mousemove','holc-fill', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const props = e.features?.[0]?.properties || {};
+        const name = getPropFlexible(props, ['holc_name','holc','name','label','title'], ['id']) || 'HOLC zone';
+        const grade = getPropFlexible(props, ['grade','grade_'], ['id']) || 'N/A';
+        infoBox.innerHTML = `<strong>${name}</strong><br/>Grade: ${grade}`;
+      });
+
+      map.on('mouseleave','holc-fill', () => {
+        map.getCanvas().style.cursor = '';
+        if (tabMap.classList.contains('active')) infoBox.innerText = 'Hover a polygon';
+      });
+
+      map.on('click','holc-fill', (e) => {
+        const props = e.features?.[0]?.properties || {};
+        console.log('Clicked props keys:', Object.keys(props));
+        console.log('Clicked props sample:', props);
+
+        // grade & label
+        const grade = getPropFlexible(props, ['grade','grade_'], ['id']) || 'N/A';
+        const label = getPropFlexible(props, ['holc_name','holc','name','label','title'], ['id']) || 'HOLC zone';
+
+        // median housing
+        const medianRaw = getPropFlexible(props, ['median','median_house','median_housing','median_house_value','median_housing_value'], ['id']);
+        const median = parseNumberFlexible(medianRaw);
+
+        // race percents
+        const pctWhite = parseNumberFlexible(getPropFlexible(props, ['white','percent_white','pct_white','white_pct'], []));
+        const pctBlack = parseNumberFlexible(getPropFlexible(props, ['black','percent_black','pct_black','black_pct'], []));
+        const pctAsian = parseNumberFlexible(getPropFlexible(props, ['asian','percent_asian','pct_asian','asian_pct'], []));
+        const pctHisp = parseNumberFlexible(getPropFlexible(props, ['hisp','hispanic','percent_hispanic','pct_hispanic'], []));
+        const pctNative = parseNumberFlexible(getPropFlexible(props, ['native','american','native_american','percent_native'], []));
+
+        // counts (robust)
+        const broadbandAnchors = parseNumberFlexible(getPropFlexible(props, ['broadband_anchor','bba','anchor','broadband_anchors','anchors'], ['percent','pct'])) ;
+        const streetTrees = parseNumberFlexible(getPropFlexible(props, ['street_tree','street_trees','trees','tree_count','street_trees_count'], ['percent','pct'])) ;
+        // rail: exclude keys that contain 'light' to avoid confusion
+        const railLength = parseNumberFlexible(getPropFlexible(props, ['rail_length','rail_len','rail_km','rail_miles','rail_m'], ['light'])) || 0;
+        // light rail: specifically match 'light' + 'rail'
+        const lightRailLength = parseNumberFlexible(getPropFlexible(props, ['light_rail','lightrail','light_rail_length','lightrail_len','light_rail_km','light_rail_m'], [])) || 0;
+
+        // broadband percents (robust)
+        const bsRaw = parseNumberFlexible(getPropFlexible(props, ['broadband_served','served_pct','percent_served','broadband_percent_served','served'], []));
+        const buRaw = parseNumberFlexible(getPropFlexible(props, ['underserved','broadband_underserved','underserved_pct','percent_underserved','underserved_percent'], []));
+        const bpRaw = parseNumberFlexible(getPropFlexible(props, ['priority','priority_underserved','priority_underserved_pct','priority_und','priority_percent'], []));
+
+        // clamp and normalize as needed
+        const bs = bsRaw !== null ? clampPct(bsRaw) : null;
+        const bu = buRaw !== null ? clampPct(buRaw) : null;
+        const bp = bpRaw !== null ? clampPct(bpRaw) : null;
+
+        // If only one of bs/bu/bp is provided and appears like fraction (0-1), parseNumber handled it already.
+        // If none provided, they'll be null; we'll show 0 segments in stacked bar.
+
+        console.log('Parsed broadband percents (bs, bu, bp):', bs, bu, bp);
+        console.log('Counts -> anchors, trees, rail, lightrail:', broadbandAnchors, streetTrees, railLength, lightRailLength);
+
+        // Build popup (scrollable)
+        let popupHtml = `<div class="popup-table"><div class="popup-scroll">`;
+        popupHtml += `<div style="margin-bottom:8px"><span class="metric">Grade:</span> ${grade}<br/><span class="metric">Label:</span> ${label}</div>`;
+        popupHtml += `<div style="margin-bottom:8px"><span class="metric">Median Housing Value:</span> ${median !== null ? '$' + formatNumber(median) : 'N/A'}</div>`;
+
+        // small race mini-bars
+        popupHtml += `<div style="margin-bottom:8px"><strong>Race %</strong>`;
+        popupHtml += miniInlineBar('White', pctWhite, '#1f78b4');
+        popupHtml += miniInlineBar('Black', pctBlack, '#6a3d9a');
+        popupHtml += miniInlineBar('Asian', pctAsian, '#b15928');
+        popupHtml += miniInlineBar('Hispanic', pctHisp, '#ff7f00');
+        popupHtml += miniInlineBar('Native American', pctNative, '#777');
+        popupHtml += `</div>`;
+
+        // counts
+        popupHtml += `<div style="margin-bottom:8px"><strong>Counts</strong>`;
+        popupHtml += `<div><span class="metric">Broadband Anchors:</span> ${broadbandAnchors !== null ? formatNumber(broadbandAnchors) : 'N/A'}</div>`;
+        popupHtml += `<div><span class="metric">Street Trees:</span> ${streetTrees !== null ? formatNumber(streetTrees) : 'N/A'}</div>`;
+        popupHtml += `<div><span class="metric">Rail Length:</span> ${railLength !== null ? railLength : '0'}</div>`;
+        popupHtml += `<div><span class="metric">Light Rail Length:</span> ${lightRailLength !== null ? lightRailLength : '0'}</div>`;
+        popupHtml += `</div>`;
+
+        // broadband stacked single bar
+        const sVal = bs !== null ? bs : 0;
+        const uVal = bu !== null ? bu : 0;
+        const pVal = bp !== null ? bp : 0;
+        popupHtml += `<div style="margin-bottom:8px"><strong>Broadband %</strong>`;
+        popupHtml += stackedSingleBarHtml(sVal, uVal, pVal, 180);
+        popupHtml += `</div>`;
+
+        popupHtml += `</div></div>`;
+        popup.setLngLat(e.lngLat).setHTML(popupHtml).addTo(map);
+
+        // Populate Graphs & Info tab (full charts)
+        const graphsTitle = document.getElementById('graphs-title');
+        const graphsContent = document.getElementById('graphs-content');
+        graphsTitle.innerText = `${label} — Grade ${grade}`;
+
+        let ghtml = '';
+        // stats
+        ghtml += '<div class="stat-grid">';
+        ghtml += `<div class="stat-card"><div style="font-weight:700">Median Housing Value</div><div style="font-size:18px">${median !== null ? '$' + formatNumber(median) : 'N/A'}</div></div>`;
+        ghtml += `<div class="stat-card"><div style="font-weight:700">Broadband Anchors</div><div style="font-size:18px">${broadbandAnchors !== null ? formatNumber(broadbandAnchors) : 'N/A'}</div></div>`;
+        ghtml += `<div class="stat-card"><div style="font-weight:700">Street Trees</div><div style="font-size:18px">${streetTrees !== null ? formatNumber(streetTrees) : 'N/A'}</div></div>`;
+        ghtml += `<div class="stat-card"><div style="font-weight:700">Rail Length</div><div style="font-size:18px">${railLength !== null ? railLength : '0'}</div></div>`;
+        ghtml += `<div class="stat-card"><div style="font-weight:700">Light Rail Length</div><div style="font-size:18px">${lightRailLength !== null ? lightRailLength : '0'}</div></div>`;
+        ghtml += '</div>';
+
+        // race bars
+        ghtml += `<div style="margin-top:18px;margin-bottom:18px"><div class="chart-title">Race composition</div>`;
+        ghtml += largeBarRow('White', pctWhite, '#1f78b4');
+        ghtml += largeBarRow('Black', pctBlack, '#6a3d9a');
+        ghtml += largeBarRow('Asian', pctAsian, '#b15928');
+        ghtml += largeBarRow('Hispanic', pctHisp, '#ff7f00');
+        ghtml += largeBarRow('Native American', pctNative, '#777');
+        ghtml += `<div class="small-note">Bars represent the percent of each race within the polygon.</div></div>`;
+
+        // broadband stacked single bar (wide)
+        ghtml += `<div style="margin-top:18px;margin-bottom:18px"><div class="chart-title">Broadband coverage (stacked)</div>`;
+        ghtml += stackedSingleBarHtml(sVal, uVal, pVal, 420);
+        ghtml += `<div class="small-note">Green = served • Yellow = underserved • Red = priority underserved</div></div>`;
+
+        graphsContent.innerHTML = ghtml;
+
+        // do not auto-switch tabs — the user can click the Graphs tab to view full charts
+      });
     });
 
-    // Keep a crisp outline
-    map.addLayer({
-      id: 'holc-line',
-      type: 'line',
-      source: 'holc-tiles',
-      'source-layer': sourceLayer,
-      paint: { 'line-color': '#222', 'line-width': 1 }
-    });
+    map.on('error', (err) => console.error('Map error', err));
+  }
 
-    // Hover + popup behavior
-    const info = document.getElementById('info');
-    const popup = new maplibregl.Popup({ closeButton:true, closeOnClick:true });
-
-    map.on('mousemove', 'holc-fill', (e) => {
-      map.getCanvas().style.cursor = 'pointer';
-      const props = e.features?.[0]?.properties || {};
-      const name = props.HOLC_NAME || props.name || props.holc_name || 'HOLC zone';
-      const grade = props.grade || props.GRADE || 'N/A';
-      info.innerHTML = `<strong>${name}</strong><br/>Grade: ${grade}`;
-    });
-
-    map.on('mouseleave', 'holc-fill', () => {
-      map.getCanvas().style.cursor = '';
-      info.innerText = 'Hover a polygon';
-    });
-
-    map.on('click', 'holc-fill', (e) => {
-      const props = e.features?.[0]?.properties || {};
-      let html = `<strong>${props.HOLC_NAME||props.name||'HOLC Zone'}</strong><br/>Grade: ${props.grade||props.GRADE||'N/A'}<hr/>`;
-      html += '<div style="max-height:220px;overflow:auto;font-size:13px">';
-      for (const k in props) {
-        if (!props.hasOwnProperty(k)) continue;
-        let v = props[k];
-        if (typeof v === 'string' && v.length > 300) v = v.slice(0,300) + '…';
-        html += `<div><strong>${k}</strong>: ${v}</div>`;
-      }
-      html += '</div>';
-      popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-    });
-  });
-
-  // helpful console output for debugging
-  map.on('error', (err) => console.error('Map error:', err));
-}
-
-init();
+  init();
 </script>
 </body>
 </html>
-
