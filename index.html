@@ -95,14 +95,15 @@
     }
     const n = Number(s.replace(/[$,\s]/g,''));
     if (!Number.isFinite(n)) return null;
-    if (n > 0 && n <= 1) return n * 100;
     return n;
   }
-  function clampPct(n) {
-    if (n === null || isNaN(n)) return null;
-    if (n > 0 && n <= 1) return n * 100;
-    return Math.max(0, Math.min(100, n));
+
+  function parsePercent(val) {
+    const num = parseNumberFlexible(val);
+    if (num === null || isNaN(num)) return 0;
+    return num;
   }
+
   function formatNumber(n) {
     return (n === null || isNaN(n)) ? 'N/A' :
             Number(n).toLocaleString(undefined, {maximumFractionDigits:0});
@@ -202,9 +203,11 @@
         const streetTrees=parseNumberFlexible(getMapped(props,'street_trees'));
         const railLength=parseNumberFlexible(getMapped(props,'rail_length'))||0;
         const lightRailLength=parseNumberFlexible(getMapped(props,'light_rail_length'))||0;
-        const bs=clampPct(parseNumberFlexible(getMapped(props,'broadband_served')));
-        const bu=clampPct(parseNumberFlexible(getMapped(props,'broadband_underserved')));
-        const bp=clampPct(parseNumberFlexible(getMapped(props,'broadband_priority')));
+
+        // ✅ Broadband fixed parsing
+        const bs=parsePercent(getMapped(props,'broadband_served'));
+        const bu=parsePercent(getMapped(props,'broadband_underserved'));
+        const bp=parsePercent(getMapped(props,'broadband_priority'));
 
         // Popup
         let html=`<div class="popup-table"><div class="popup-scroll">
