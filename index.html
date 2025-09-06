@@ -7,26 +7,6 @@
   <link href="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.js"></script>
   <style>
-    /* Add a small panel for toggling layers */
-    #layer-controls {
-      position: absolute;
-      top: 72px;
-      left: 12px;
-      background: #fff;
-      padding: 8px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      font-size: 13px;
-      z-index: 3;
-    }
-    #layer-controls label {
-      display: block;
-      margin-bottom: 4px;
-      cursor: pointer;
-    }
-  </style>
-
-  <style>
     body { margin:0; font-family: Arial, Helvetica, sans-serif; }
     .tabs { display:flex; gap:8px; padding:10px; background:#f5f6f8; }
     .tab { padding:8px 12px; border-radius:6px; cursor:pointer; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.06); }
@@ -45,9 +25,20 @@
     .bar-label { width:160px; font-size:13px; }
     .bar-track { background:#eee; height:18px; width:420px; border-radius:4px; overflow:hidden; }
     .bar-fill { height:100%; border-radius:4px; }
-    .small-note { font-size:12px; color:#666; margin-top:6px; }
     .stat-grid { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:18px; }
     .stat-card { min-width:160px; background:#fafafa; padding:10px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    #layer-controls {
+      position: absolute;
+      top: 72px;
+      left: 12px;
+      background: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      font-size: 13px;
+      z-index: 3;
+    }
+    #layer-controls label { display: block; margin-bottom: 4px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -78,27 +69,16 @@
   <label><input type="checkbox" id="toggle-infra" checked> Infrastructure</label>
 </div>
 
-
 <script>
-  /* ===== CONFIG ===== */
   const TILEJSON_URL = "https://api.maptiler.com/tiles/01990763-49f0-77ce-b1b1-b97328f38e70/tiles.json?key=PrTVbrUk3PBatpAWhyvh";
 
-  /* ===== Field Map (exact property names from your dataset) ===== */
   const FIELD_MAP = {
-    grade: "grade",
-    label: "label",
-    median: "Median Housing Value",
-    pct_white: "Percent White",
-    pct_black: "Percent Black",
-    pct_asian: "Percent Asian",
-    pct_hisp: "Percent Hispanic",
-    pct_native: "Percent Native American",
-    broadband_anchors: "Broadband Anchors",
-    street_trees: "Street Trees",
-    rail_length: "Rail Length",
-    light_rail_length: "Light Rail Length",
-    broadband_served: "Broadband Percent Served",
-    broadband_underserved: "Broadband Percent Underserved",
+    grade: "grade", label: "label", median: "Median Housing Value",
+    pct_white: "Percent White", pct_black: "Percent Black", pct_asian: "Percent Asian",
+    pct_hisp: "Percent Hispanic", pct_native: "Percent Native American",
+    broadband_anchors: "Broadband Anchors", street_trees: "Street Trees",
+    rail_length: "Rail Length", light_rail_length: "Light Rail Length",
+    broadband_served: "Broadband Percent Served", broadband_underserved: "Broadband Percent Underserved",
     broadband_priority: "Broadband Percent Priority Underserved"
   };
 
@@ -108,7 +88,6 @@
     return props.hasOwnProperty(k) ? props[k] : null;
   }
 
-  /* ===== Helpers ===== */
   function parseNumberFlexible(v) {
     if (v === null || v === undefined) return null;
     if (typeof v === 'number' && Number.isFinite(v)) return v;
@@ -126,7 +105,8 @@
   function parsePercent(val) {
     const num = parseNumberFlexible(val);
     if (num === null || isNaN(num)) return 0;
-    return num;
+    // ✅ Normalize: if between 0 and 1, treat as fraction
+    return num <= 1 ? num * 100 : num;
   }
 
   function formatNumber(n) {
@@ -134,7 +114,6 @@
             Number(n).toLocaleString(undefined, {maximumFractionDigits:0});
   }
 
-  /* Mini charts */
   function miniInlineBar(label, pct, color) {
     const p = pct ? Math.max(0, Math.min(100, pct)) : 0;
     return `<div style="display:flex;align-items:center;margin:4px 0;">
@@ -145,6 +124,7 @@
       <div style="min-width:46px;text-align:right;margin-left:8px;font-size:12px">${p.toFixed(1)}%</div>
     </div>`;
   }
+
   function largeBarRow(label, pct, color) {
     const p = pct ? Math.max(0, Math.min(100, pct)) : 0;
     return `<div class="bar-row">
@@ -153,6 +133,7 @@
       <div style="min-width:56px;text-align:right;font-weight:600">${p.toFixed(1)}%</div>
     </div>`;
   }
+
   function stackedSingleBarHtml(s,u,p,w=420) {
     const sum = (s||0)+(u||0)+(p||0);
     const ws = sum? (s/sum)*100:0, wu = sum? (u/sum)*100:0, wp = sum? (p/sum)*100:0;
@@ -167,52 +148,48 @@
     </div>`;
   }
 
-  /* ===== Tabs ===== */
-  const tabMap = document.getElementById('tab-map');
-  const tabGraphs = document.getElementById('tab-graphs');
-  const mapEl = document.getElementById('map');
-  const graphsEl = document.getElementById('graphs');
-  const infoBox = document.getElementById('info');
-  const legendEl = document.getElementById('legend');
-  tabMap.onclick = () => { tabMap.classList.add('active'); tabGraphs.classList.remove('active');
-    mapEl.style.display='block'; graphsEl.style.display='none'; infoBox.style.display='block'; legendEl.style.display='block';
-    if (window._map) window._map.resize();
-  };
-  tabGraphs.onclick = () => { tabGraphs.classList.add('active'); tabMap.classList.remove('active');
-    mapEl.style.display='none'; graphsEl.style.display='block'; infoBox.style.display='none'; legendEl.style.display='none';
-  };
+  const tabMap=document.getElementById('tab-map');
+  const tabGraphs=document.getElementById('tab-graphs');
+  const mapEl=document.getElementById('map');
+  const graphsEl=document.getElementById('graphs');
+  const infoBox=document.getElementById('info');
+  const legendEl=document.getElementById('legend');
+  tabMap.onclick=()=>{tabMap.classList.add('active');tabGraphs.classList.remove('active');
+    mapEl.style.display='block';graphsEl.style.display='none';infoBox.style.display='block';legendEl.style.display='block';
+    if(window._map)window._map.resize();};
+  tabGraphs.onclick=()=>{tabGraphs.classList.add('active');tabMap.classList.remove('active');
+    mapEl.style.display='none';graphsEl.style.display='block';infoBox.style.display='none';legendEl.style.display='none';};
 
-  /* ===== Map init ===== */
   async function init() {
-    const tj = await (await fetch(TILEJSON_URL)).json();
-    const sourceLayer = tj.vector_layers?.[0]?.id;
+    const tj=await (await fetch(TILEJSON_URL)).json();
+    const sourceLayer=tj.vector_layers?.[0]?.id;
 
-    const style = {
-      version: 8,
-      sources: {
-        "osm": { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256 },
-        "holc-tiles": { type: "vector", url: TILEJSON_URL }
-      },
-      layers: [{ id:'osm', type:'raster', source:'osm' }]
-    };
-    const map = new maplibregl.Map({ container:'map', style, center:[-121.8863,37.3382], zoom:12 });
-    window._map = map;
+    const style={version:8,
+      sources:{osm:{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256},
+        "holc-tiles":{type:"vector",url:TILEJSON_URL}},
+      layers:[{id:'osm',type:'raster',source:'osm'}]};
 
-    map.on('load', () => {
-      map.addLayer({
-        id:'holc-fill', type:'fill', source:'holc-tiles', 'source-layer':sourceLayer,
-        paint:{ 'fill-color':['match',['get','grade'],'A','#2ca25f','B','#1f78b4','C','#f1c40f','D','#e34a33','#999'],
-          'fill-opacity':0.65 }
-      });
-      map.addLayer({ id:'holc-line', type:'line', source:'holc-tiles', 'source-layer':sourceLayer,
-        paint:{'line-color':'#222','line-width':1} });
+    const map=new maplibregl.Map({container:'map',style,center:[-121.8863,37.3382],zoom:12});
+    window._map=map;
 
-      const popup = new maplibregl.Popup({closeButton:true,closeOnClick:true,maxWidth:'380px'});
+    map.on('load',()=>{
+      map.addLayer({id:'holc-fill',type:'fill',source:'holc-tiles','source-layer':sourceLayer,
+        paint:{'fill-color':['match',['get','grade'],'A','#2ca25f','B','#1f78b4','C','#f1c40f','D','#e34a33','#999'],
+          'fill-opacity':0.65}});
+      map.addLayer({id:'holc-line',type:'line',source:'holc-tiles','source-layer':sourceLayer,
+        paint:{'line-color':'#222','line-width':1}});
+
+      // Infrastructure overlay
+      map.addSource('rail',{type:'geojson',
+        data:'https://api.maptiler.com/data/01990e77-7d61-7687-8575-6e804eb532f6/features.json?key=PrTVbrUk3PBatpAWhyvh'});
+      map.addLayer({id:'rail-line',type:'line',source:'rail',
+        paint:{'line-color':'#8e44ad','line-width':2}});
+
+      const popup=new maplibregl.Popup({closeButton:true,closeOnClick:true,maxWidth:'380px'});
 
       map.on('mousemove','holc-fill',e=>{
         const props=e.features[0].properties;
-        infoBox.innerHTML=`<strong>${getMapped(props,'label')||'Zone'}</strong><br/>Grade: ${getMapped(props,'grade')||'N/A'}`;
-      });
+        infoBox.innerHTML=`<strong>${getMapped(props,'label')||'Zone'}</strong><br/>Grade: ${getMapped(props,'grade')||'N/A'}`;});
       map.on('mouseleave','holc-fill',()=>infoBox.innerText='Hover a polygon');
 
       map.on('click','holc-fill',e=>{
@@ -228,18 +205,16 @@
         const streetTrees=parseNumberFlexible(getMapped(props,'street_trees'));
         const railLength=parseNumberFlexible(getMapped(props,'rail_length'))||0;
         const lightRailLength=parseNumberFlexible(getMapped(props,'light_rail_length'))||0;
-
-        // ✅ Broadband fixed parsing
         const bs=parsePercent(getMapped(props,'broadband_served'));
         const bu=parsePercent(getMapped(props,'broadband_underserved'));
         const bp=parsePercent(getMapped(props,'broadband_priority'));
 
-        // Popup
         let html=`<div class="popup-table"><div class="popup-scroll">
           <div><span class="metric">Grade:</span> ${grade}<br/><span class="metric">Label:</span> ${label}</div>
           <div><span class="metric">Median Housing Value:</span> ${median?'$'+formatNumber(median):'N/A'}</div>
-          <div><strong>Race %</strong>${miniInlineBar('White',pctWhite,'#1f78b4')}${miniInlineBar('Black',pctBlack,'#6a3d9a')}
-          ${miniInlineBar('Asian',pctAsian,'#b15928')}${miniInlineBar('Hispanic',pctHisp,'#ff7f00')}${miniInlineBar('Native',pctNative,'#777')}</div>
+          <div><strong>Race %</strong>${miniInlineBar('White',pctWhite,'#1f78b4')}
+          ${miniInlineBar('Black',pctBlack,'#6a3d9a')}${miniInlineBar('Asian',pctAsian,'#b15928')}
+          ${miniInlineBar('Hispanic',pctHisp,'#ff7f00')}${miniInlineBar('Native',pctNative,'#777')}</div>
           <div><strong>Counts</strong><div>Broadband Anchors: ${formatNumber(broadbandAnchors)}</div>
           <div>Street Trees: ${formatNumber(streetTrees)}</div>
           <div>Rail Length: ${railLength}</div><div>Light Rail Length: ${lightRailLength}</div></div>
@@ -247,7 +222,6 @@
         </div></div>`;
         popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
 
-        // Graphs tab
         const graphsTitle=document.getElementById('graphs-title');
         const graphsContent=document.getElementById('graphs-content');
         graphsTitle.innerText=`${label} — Grade ${grade}`;
@@ -264,6 +238,17 @@
         ghtml+=`<div><div class="chart-title">Broadband coverage</div>${stackedSingleBarHtml(bs||0,bu||0,bp||0,420)}</div>`;
         graphsContent.innerHTML=ghtml;
       });
+
+      // Layer toggles
+      document.getElementById('toggle-holc').onchange=(e)=>{
+        const v=e.target.checked?'visible':'none';
+        map.setLayoutProperty('holc-fill','visibility',v);
+        map.setLayoutProperty('holc-line','visibility',v);
+      };
+      document.getElementById('toggle-infra').onchange=(e)=>{
+        const v=e.target.checked?'visible':'none';
+        map.setLayoutProperty('rail-line','visibility',v);
+      };
     });
   }
   init();
