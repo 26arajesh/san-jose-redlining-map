@@ -31,6 +31,18 @@
     #layer-controls label { display: block; margin-bottom: 4px; cursor: pointer; }
     .infra-legend { position:absolute; right:12px; top:180px; background:#fff; padding:10px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.12); z-index:2; font-size:13px; }
     .infra-swatch { width:18px; height:12px; border-radius:2px; border:1px solid rgba(0,0,0,0.08); display:inline-block; margin-right:8px; vertical-align:middle; }
+
+    /* New styles for the Graphs & Info section */
+    .overview-content { display: block; }
+    .polygon-content { display: none; }
+    #back-to-overview { margin-bottom: 20px; padding: 8px 16px; background: #0b6cff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .graph-image { max-width: 100%; margin: 15px 0; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .call-to-action { background: #f0f7ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0b6cff; }
+    .research-section { margin-bottom: 30px; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+    @media (max-width: 768px) {
+      .chart-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -40,9 +52,88 @@
 </div>
 <div id="map"></div>
 <div id="graphs">
-  <h2 id="graphs-title">Select a polygon to view charts</h2>
-  <div id="graphs-content">
-    <p>Click a HOLC polygon on the map to populate these graphs and metrics.</p>
+  <div class="overview-content">
+    <h2>The Lasting Impact of Redlining in San Jose</h2>
+
+    <div class="research-section">
+      <h3>Introduction</h3>
+      <p>Redlining, one of the most explicit forms of structural racism, lasted over 30 years and continues to impact U.S. cities like San Jose today. This discriminatory practice denied financial services to minority communities, creating lasting disparities in wealth and opportunity.</p>
+      <p>Home ownership is the biggest driver of wealth in the US. The homeownership rate among white non-Hispanic Americans is 73.3%, compared to just 42.1% among Black Americans. This wealth gap stems directly from historical policies like redlining that systematically excluded communities of color from homeownership opportunities.</p>
+    </div>
+
+    <div class="research-section">
+      <h3>Historical Background</h3>
+      <p>In the 1930s, the Home Owners' Loan Corporation (HOLC) graded neighborhoods across the country:</p>
+      <ul>
+        <li><strong>A (Best)</strong>: Predominantly white neighborhoods that received ample investment</li>
+        <li><strong>B (Still Desirable)</strong>: Mostly white neighborhoods considered good investments</li>
+        <li><strong>C (Declining)</strong>: Neighborhoods with minority residents, deemed risky for investment</li>
+        <li><strong>D (Hazardous)</strong>: Predominantly Black, Hispanic, and immigrant communities, systematically denied loans and investment</li>
+      </ul>
+      <p>These discriminatory practices isolated minority racial groups and created patterns of segregation that persist today.</p>
+    </div>
+
+    <div class="research-section">
+      <h3>Key Findings: Infrastructure Disparities</h3>
+      <p>My analysis reveals stark disparities in infrastructure investment between neighborhoods with different HOLC grades:</p>
+
+      <div class="chart-grid">
+        <div>
+          <h4>Broadband Access</h4>
+          <iframe width="506" height="315" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=280698462&amp;format=interactive" class="graph-image"></iframe>
+          <p>Historically redlined areas (Grades C & D) have significantly fewer broadband anchors per square kilometer, limiting digital access and economic opportunities.</p>
+        </div>
+
+        <div>
+          <h4>Green Infrastructure</h4>
+          <iframe width="506" height="315" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1010210670&amp;format=interactive" class="graph-image"></iframe>
+          <iframe width="506" height="315" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=539685908&amp;format=interactive" class="graph-image"></iframe>
+          <p>Neighborhoods graded D have far fewer street trees, contributing to urban heat island effects and reduced quality of life. Furthermore, there is significantly more rail, leading to noise and air pollution, detrimental for the health of citizens.</p>
+        </div>
+
+        <div>
+          <h4>Housing Values</h4>
+          <iframe width="506" height="315" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1395206384&amp;format=interactive" class="graph-image"></iframe>
+          <p>The legacy of redlining is clearly visible in current housing values, with formerly redlined areas having significantly lower median values.</p>
+        </div>
+
+        <div>
+          <h4>Racial Demographics</h4>
+          <iframe width="506" height="315" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=134847115&amp;format=interactive" class="graph-image"></iframe>
+          <p>Historical patterns of segregation persist, with formerly redlined areas still having higher concentrations of Hispanic and Black residents.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="research-section">
+      <h3>Policy Implications</h3>
+      <p>The data reveals how historical redlining continues to shape San Jose's neighborhoods through:</p>
+      <ul>
+        <li><strong>Disinvestment</strong>: Formerly redlined areas have the lowest median housing values, reducing tax revenue and limiting infrastructure funding</li>
+        <li><strong>Persistent Racial Disparities</strong>: These areas still have higher concentrations of Hispanic residents, reflecting lasting segregation</li>
+        <li><strong>Infrastructure Deficits</strong>: Fewer street trees contribute to higher temperatures, while limited broadband access restricts economic opportunities</li>
+      </ul>
+    </div>
+
+    <div class="call-to-action">
+      <h3>Call to Action for San Jose Leaders</h3>
+      <p>Targeted policies must address these historical inequities to break the cycle of inequality. We recommend:</p>
+      <ol>
+        <li>Prioritizing infrastructure investments in formerly redlined neighborhoods</li>
+        <li>Implementing targeted broadband expansion programs in underserved areas</li>
+        <li>Increasing green infrastructure and tree canopy in heat-vulnerable neighborhoods</li>
+        <li>Developing housing policies that explicitly address historical disparities</li>
+      </ol>
+      <p>Explore the map to see how these patterns manifest in specific neighborhoods across San Jose.</p>
+    </div>
+  </div>
+
+  <div class="polygon-content">
+    <button id="back-to-overview">← Back to Overview</button>
+    <h2 id="graphs-title">Select a polygon to view charts</h2>
+    <div id="graphs-content">
+      <p>Click a HOLC polygon on the map to populate these graphs and metrics.</p>
+    </div>
   </div>
 </div>
 <div id="info">Hover a polygon</div>
@@ -152,6 +243,9 @@
   const infoBox = document.getElementById('info');
   const legendEl = document.getElementById('legend');
   const layerControlsEl = document.getElementById('layer-controls');
+  const overviewContent = document.querySelector('.overview-content');
+  const polygonContent = document.querySelector('.polygon-content');
+  const backToOverviewBtn = document.getElementById('back-to-overview');
 
   tabMap.onclick = () => {
     tabMap.classList.add('active');
@@ -172,6 +266,11 @@
     infoBox.style.display = 'none';
     legendEl.style.display = 'none';
     layerControlsEl.style.display = 'none';
+  };
+
+  backToOverviewBtn.onclick = () => {
+    overviewContent.style.display = 'block';
+    polygonContent.style.display = 'none';
   };
 
   async function init() {
@@ -370,6 +469,10 @@
                     </div>`;
 
         graphsContent.innerHTML = ghtml;
+
+        // Show polygon content and hide overview
+        overviewContent.style.display = 'none';
+        polygonContent.style.display = 'block';
       });
 
       // Layer toggles
