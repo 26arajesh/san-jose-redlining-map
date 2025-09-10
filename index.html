@@ -123,7 +123,7 @@
     #info {
       position: absolute;
       left: 15px;
-      top: 15px;
+      top: 60px; /* Moved down to avoid overlap with layer controls */
       background: rgba(255, 255, 255, 0.95);
       padding: 10px;
       border-radius: 6px;
@@ -255,10 +255,19 @@
       color: #1a2a6c;
       border-bottom: 2px solid #f1c40f;
       padding-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .content-card h3 {
       color: #2a4b8c;
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    .content-card h4 {
+      color: #2a4b8c;
+      margin-top: 20px;
+      margin-bottom: 10px;
     }
 
     .info-box {
@@ -339,41 +348,28 @@
       transform: scale(1.05);
     }
 
-    .circle-info {
-      display: none;
-      margin-top: 20px;
+    .circle-modal-content {
       padding: 20px;
-      border-radius: 8px;
-      color: white;
+    }
+
+    .circle-modal-content h3 {
+      color: #1a2a6c;
+      margin-top: 0;
+      border-bottom: 2px solid #f1c40f;
+      padding-bottom: 10px;
     }
 
     /* Contact Form */
     .contact-form {
-      max-width: 600px;
+      max-width: 100%;
       margin: 0 auto;
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .form-group input,
-    .form-group textarea {
+    .google-form-container {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    .form-group textarea {
-      min-height: 150px;
+      height: 664px;
+      border: none;
+      margin: 20px 0;
     }
 
     .submit-btn {
@@ -391,6 +387,25 @@
       position: absolute;
       bottom: 15px;
       left: 15px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: white;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Home Button */
+    .home-btn {
+      position: absolute;
+      top: 110px;
+      right: 15px;
       z-index: 2;
       width: 36px;
       height: 36px;
@@ -447,6 +462,48 @@
       .content-card {
         padding: 15px;
       }
+
+      .content-card h2 {
+        margin-top: 10px;
+        font-size: 1.5rem;
+      }
+
+      .map-controls {
+        top: 70px;
+        right: 10px;
+      }
+
+      .map-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+
+      .home-btn {
+        top: 115px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+
+      #info {
+        top: 50px;
+        left: 10px;
+        max-width: 200px;
+        font-size: 12px;
+        padding: 8px;
+      }
+
+      #layer-controls {
+        top: 50px;
+        left: 10px;
+        padding: 8px;
+      }
+
+      .google-form-container {
+        height: 800px;
+      }
     }
   </style>
 </head>
@@ -475,6 +532,10 @@
     <button class="map-btn" id="zoom-in">+</button>
     <button class="map-btn" id="zoom-out">-</button>
   </div>
+
+  <button class="home-btn" id="home-btn">
+    <i class="fas fa-home"></i>
+  </button>
 
   <div id="info">Click on a zone for more info</div>
 
@@ -644,45 +705,6 @@
         Racial Demographics
       </div>
     </div>
-
-    <!-- Broadband Access -->
-    <div class="circle-info" id="broadband-info" style="background: rgba(66, 133, 244, 0.9);">
-      <h3>Broadband Access Disparities</h3>
-      <div class="chart-container">
-        <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=280698462&amp;format=interactive"></iframe>
-      </div>
-      <p>Historically redlined areas (Grades C & D) have significantly fewer broadband anchors per square kilometer, limiting digital access and economic opportunities.</p>
-    </div>
-
-    <!-- Green Infrastructure -->
-    <div class="circle-info" id="green-info" style="background: rgba(52, 168, 83, 0.9);">
-      <h3>Green Infrastructure Disparities</h3>
-      <div class="chart-container">
-        <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1010210670&amp;format=interactive"></iframe>
-      </div>
-      <div class="chart-container">
-        <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=539685908&amp;format=interactive"></iframe>
-      </div>
-      <p>Neighborhoods graded D have far fewer street trees, contributing to urban heat island effects and reduced quality of life. Furthermore, there is significantly more rail, leading to noise and air pollution, detrimental for the health of citizens.</p>
-    </div>
-
-    <!-- Housing Values -->
-    <div class="circle-info" id="housing-info" style="background: rgba(251, 188, 5, 0.9);">
-      <h3>Housing Value Disparities</h3>
-      <div class="chart-container">
-        <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1395206384&amp;format=interactive"></iframe>
-      </div>
-      <p>The legacy of redlining is clearly visible in current housing values, with formerly redlined areas having significantly lower median values.</p>
-    </div>
-
-    <!-- Racial Demographics -->
-    <div class="circle-info" id="demographics-info" style="background: rgba(234, 67, 53, 0.9);">
-      <h3>Racial Demographic Patterns</h3>
-      <div class="chart-container">
-        <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=134847115&amp;format=interactive"></iframe>
-      </div>
-      <p>Historical patterns of segregation persist, with formerly redlined areas still having higher concentrations of Hispanic and Black residents.</p>
-    </div>
   </div>
 </div>
 
@@ -777,34 +799,13 @@
     <p>We welcome your questions, comments, and feedback about this research on the lasting impacts of redlining in San Jose.</p>
 
     <div class="contact-form">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" placeholder="Your name">
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Your email address">
-      </div>
-
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" placeholder="Your message or question"></textarea>
-      </div>
-
-      <button class="submit-btn">Send Message</button>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScMi683vX3unkqJ88EshU_8aypCe3Dg_pIobZnm5C_XM5S_Dg/viewform?embedded=true" class="google-form-container">Loading…</iframe>
     </div>
 
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
       <h3>Additional Information</h3>
       <p><strong>Researcher:</strong> Aditya Rajesh</p>
-      <p><strong>Email:</strong> the.aditya.rajesh@gmail.com</p>
-      <p><strong>Project Website:</strong> <a href="#">URL to be added</a></p>
-
-      <div style="margin-top: 20px;">
-        <p>To participate in our ongoing research or request a presentation for your organization, please complete our interest form:</p>
-        <a href="https://forms.google.com" target="_blank" style="display: inline-block; background: #1a2a6c; color: white; padding: 12px 20px; border-radius: 4px; text-decoration: none; margin-top: 10px;">Google Interest Form</a>
-      </div>
+      <p><strong>Email:</strong> example@email.com</p>
     </div>
   </div>
 </div>
@@ -902,6 +903,14 @@
   </div>
 </div>
 
+<!-- Circle Modal for Graphs -->
+<div id="circle-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeCircleModal()">&times;</span>
+    <div id="circle-modal-content" class="circle-modal-content"></div>
+  </div>
+</div>
+
 <script>
   const TILEJSON_URL = "https://api.maptiler.com/tiles/01990763-49f0-77ce-b1b1-b97328f38e70/tiles.json?key=PrTVbrUk3PBatpAWhyvh";
   const FIELD_MAP = {
@@ -974,6 +983,7 @@
     btn.addEventListener('click', () => {
       tutorialModal.style.display = 'none';
       document.getElementById('fullscreen-modal').style.display = 'none';
+      document.getElementById('circle-modal').style.display = 'none';
     });
   });
 
@@ -983,21 +993,61 @@
 
   // Circles interaction for Graphs & Results
   const circles = document.querySelectorAll('.satellite-circle');
-  const circleInfos = document.querySelectorAll('.circle-info');
 
   circles.forEach(circle => {
     circle.addEventListener('click', () => {
       const category = circle.getAttribute('data-category');
-
-      // Hide all info boxes
-      circleInfos.forEach(info => {
-        info.style.display = 'none';
-      });
-
-      // Show selected info box
-      document.getElementById(`${category}-info`).style.display = 'block';
+      showCircleModal(category);
     });
   });
+
+  function showCircleModal(category) {
+    const modal = document.getElementById('circle-modal');
+    const content = document.getElementById('circle-modal-content');
+
+    let html = '';
+
+    switch(category) {
+      case 'broadband':
+        html = `<h3>Broadband Access Disparities</h3>
+                <div class="chart-container">
+                  <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=280698462&amp;format=interactive"></iframe>
+                </div>
+                <p>Historically redlined areas (Grades C & D) have significantly fewer broadband anchors per square kilometer, limiting digital access and economic opportunities.</p>`;
+        break;
+      case 'green':
+        html = `<h3>Green Infrastructure Disparities</h3>
+                <div class="chart-container">
+                  <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1010210670&amp;format=interactive"></iframe>
+                </div>
+                <div class="chart-container">
+                  <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=539685908&amp;format=interactive"></iframe>
+                </div>
+                <p>Neighborhoods graded D have far fewer street trees, contributing to urban heat island effects and reduced quality of life. Furthermore, there is significantly more rail, leading to noise and air pollution, detrimental for the health of citizens.</p>`;
+        break;
+      case 'housing':
+        html = `<h3>Housing Value Disparities</h3>
+                <div class="chart-container">
+                  <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=1395206384&amp;format=interactive"></iframe>
+                </div>
+                <p>The legacy of redlining is clearly visible in current housing values, with formerly redlined areas having significantly lower median values.</p>`;
+        break;
+      case 'demographics':
+        html = `<h3>Racial Demographic Patterns</h3>
+                <div class="chart-container">
+                  <iframe class="responsive-iframe" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRg1FjbeS85-cFpzGsRdobMtjb_Iu-JJJDjllgzePXZXgnHbJYPX94m5tHMcTfh2ebHqLBUT15gZWRM/pubchart?oid=134847115&amp;format=interactive"></iframe>
+                </div>
+                <p>Historical patterns of segregation persist, with formerly redlined areas still having higher concentrations of Hispanic and Black residents.</p>`;
+        break;
+    }
+
+    content.innerHTML = html;
+    modal.style.display = 'block';
+  }
+
+  function closeCircleModal() {
+    document.getElementById('circle-modal').style.display = 'none';
+  }
 
   // Fullscreen details modal functions
   function showFullscreenDetails(props) {
@@ -1150,6 +1200,15 @@
 
     document.getElementById('zoom-out').addEventListener('click', () => {
       map.zoomOut();
+    });
+
+    // Add home button functionality
+    document.getElementById('home-btn').addEventListener('click', () => {
+      map.flyTo({
+        center: [-121.8863, 37.3382],
+        zoom: 12,
+        essential: true
+      });
     });
 
     map.on('load', () => {
