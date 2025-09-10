@@ -120,17 +120,45 @@
       justify-content: center;
     }
 
-    #info {
+    /* Sidebar container that stacks controls */
+    #sidebar {
       position: absolute;
+      top: 60px;
       left: 15px;
-      top: 60px; /* Moved down to avoid overlap with layer controls */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 3;
+      align-items: flex-start; /* left align children */
+      max-width: 320px;
+    }
+
+    /* Layer controls (now non-absolute; will be stacked inside #sidebar) */
+    #layer-controls {
       background: rgba(255, 255, 255, 0.95);
       padding: 10px;
       border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      z-index: 2;
-      max-width: 300px;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    #layer-controls label {
+      display: block;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    /* Info box (stacked under layer-controls inside #sidebar) */
+    #info {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       font-size: 14px;
+      width: 100%;
+      max-width: 320px;
+      z-index: 2;
     }
 
     .legend {
@@ -157,24 +185,6 @@
 
     .legend .row {
       margin-bottom: 6px;
-    }
-
-    #layer-controls {
-      position: absolute;
-      top: 60px;
-      left: 15px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      font-size: 13px;
-      z-index: 2;
-    }
-
-    #layer-controls label {
-      display: block;
-      margin-bottom: 6px;
-      cursor: pointer;
     }
 
     /* Popup Styles */
@@ -275,6 +285,14 @@
       border-left: 4px solid #1a2a6c;
       padding: 15px;
       margin: 20px 0;
+    }
+
+    .policy-box {
+      background: #f8f9fa;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
     }
 
     .chart-grid {
@@ -457,6 +475,7 @@
       .content-section {
         top: 96px;
         padding: 15px;
+        padding-top: 30px; /* Added more top padding for mobile */
       }
 
       .content-card {
@@ -464,13 +483,17 @@
       }
 
       .content-card h2 {
-        margin-top: 10px;
+        margin-top: 0;
         font-size: 1.5rem;
+        padding-top: 5px;
+        margin-bottom: 15px;
       }
 
       .map-controls {
         top: 70px;
         right: 10px;
+        flex-direction: row; /* Change to row layout on mobile */
+        gap: 5px;
       }
 
       .map-btn {
@@ -480,29 +503,56 @@
       }
 
       .home-btn {
-        top: 115px;
-        right: 10px;
+        top: 70px;
+        right: 110px; /* Position to left of zoom controls */
         width: 32px;
         height: 32px;
         font-size: 16px;
       }
 
-      #info {
+      /* Sidebar adjustments for mobile */
+      #sidebar {
         top: 50px;
         left: 10px;
-        max-width: 200px;
-        font-size: 12px;
+        gap: 8px;
+        max-width: 240px;
+      }
+
+      #info {
+        max-width: 240px;
+        font-size: 13px;
         padding: 8px;
       }
 
       #layer-controls {
-        top: 50px;
-        left: 10px;
         padding: 8px;
+        font-size: 13px;
       }
 
       .google-form-container {
         height: 800px;
+      }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 480px) {
+      .home-btn {
+        right: 100px; /* Adjust for very small screens */
+      }
+
+      .content-section {
+        padding-top: 35px; /* Even more padding for very small screens */
+      }
+
+      #sidebar {
+        left: 8px;
+        top: 48px;
+        max-width: 200px;
+      }
+
+      #info {
+        max-width: 200px;
+        font-size: 12px;
       }
     }
   </style>
@@ -537,7 +587,17 @@
     <i class="fas fa-home"></i>
   </button>
 
-  <div id="info">Click on a zone for more info</div>
+  <!-- Sidebar: stacks layer controls and info box -->
+  <div id="sidebar">
+    <div id="layer-controls">
+      <label><input type="checkbox" id="toggle-holc" checked> HOLC Zones</label>
+      <label><input type="checkbox" id="toggle-rail"> Rail</label>
+      <label><input type="checkbox" id="toggle-light-rail"> Light Rail</label>
+      <label><input type="checkbox" id="toggle-broadband"> Broadband Anchors</label>
+    </div>
+
+    <div id="info">Click on a zone for more info</div>
+  </div>
 
   <button class="help-btn" id="help-btn">
     <i class="fas fa-question"></i>
@@ -549,13 +609,6 @@
     <div class="row"><span class="swatch" style="background:#1f78b4"></span>B - Still Desirable</div>
     <div class="row"><span class="swatch" style="background:#f1c40f"></span>C - Declining</div>
     <div class="row"><span class="swatch" style="background:#e34a33"></span>D - Hazardous</div>
-  </div>
-
-  <div id="layer-controls">
-    <label><input type="checkbox" id="toggle-holc" checked> HOLC Zones</label>
-    <label><input type="checkbox" id="toggle-rail"> Rail</label>
-    <label><input type="checkbox" id="toggle-light-rail"> Light Rail</label>
-    <label><input type="checkbox" id="toggle-broadband"> Broadband Anchors</label>
   </div>
 </div>
 
@@ -714,7 +767,7 @@
     <h2>Policy Implications</h2>
     <p>The research findings demonstrate that historical redlining continues to shape contemporary inequality in San Jose. Addressing these disparities requires targeted policy interventions.</p>
 
-    <div class="info-box">
+    <div class="policy-box">
       <h3>Key Findings</h3>
       <ul>
         <li><strong>Disinvestment:</strong> Formerly redlined areas have the lowest median housing values, reducing tax revenue and limiting infrastructure funding</li>
@@ -728,7 +781,7 @@
 
     <div class="chart-grid">
       <div>
-        <div class="info-box">
+        <div class="policy-box">
           <h4>Housing & Economic Justice</h4>
           <ul>
             <li>Implement targeted down payment assistance programs in historically redlined areas</li>
@@ -740,7 +793,7 @@
       </div>
 
       <div>
-        <div class="info-box">
+        <div class="policy-box">
           <h4>Infrastructure Investment</h4>
           <ul>
             <li>Prioritize broadband infrastructure expansion in underserved neighborhoods</li>
@@ -752,7 +805,7 @@
       </div>
 
       <div>
-        <div class="info-box">
+        <div class="policy-box">
           <h4>Health & Environmental Equity</h4>
           <ul>
             <li>Address urban heat island effects through cool pavement and roof initiatives</li>
@@ -764,7 +817,7 @@
       </div>
 
       <div>
-        <div class="info-box">
+        <div class="policy-box">
           <h4>Community Engagement & Reparative Justice</h4>
           <ul>
             <li>Create community oversight boards for development decisions</li>
@@ -786,7 +839,7 @@
       <li>Establishes accountability measures to track progress</li>
     </ol>
 
-    <div class="info-box">
+    <div class="policy-box">
       <p>By consciously addressing the legacy of redlining, San Jose can become a more equitable and just city for all residents.</p>
     </div>
   </div>
@@ -805,7 +858,7 @@
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
       <h3>Additional Information</h3>
       <p><strong>Researcher:</strong> Aditya Rajesh</p>
-      <p><strong>Email:</strong> example@email.com</p>
+      <p><strong>Email:</strong> the.aditya.rajesh@gmail.com</p>
     </div>
   </div>
 </div>
