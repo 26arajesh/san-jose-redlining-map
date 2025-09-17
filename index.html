@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Prolonged Impact of Redlining in San Jose</title>
+  <title>San Jose Redlining</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <link href="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.css" rel="stylesheet"/>
   <script src="https://unpkg.com/maplibre-gl@1.15.2/dist/maplibre-gl.js"></script>
@@ -332,8 +332,9 @@
     .central-circle {
       width: 160px;
       height: 160px;
+      fill-opacity: 0.7;
       border-radius: 50%;
-      background: #1a2a6c;
+      background: #3b446c;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -342,7 +343,7 @@
       text-align: center;
       padding: 20px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 2;
+      z-index: 0;
       position: absolute;
     }
 
@@ -560,7 +561,7 @@
 <body>
 <!-- Header with Title -->
 <div class="header">
-  <h1>Prolonged Impact of Redlining in San Jose</h1>
+  <h1>Tracing the Long-Term Consequences of Redlining in San Jose</h1>
 </div>
 
 <!-- Navigation Tabs -->
@@ -568,7 +569,7 @@
   <div id="tab-map" class="tab active">Map</div>
   <div id="tab-redlining" class="tab">What is Redlining</div>
   <div id="tab-methodology" class="tab">Study Methodology</div>
-  <div id="tab-graphs" class="tab">Graphs & Results</div>
+  <div id="tab-graphs" class="tab">Findings</div>
   <div id="tab-policy" class="tab">Policy Implications</div>
   <div id="tab-contact" class="tab">Contact</div>
 </div>
@@ -737,25 +738,35 @@
 <!-- Graphs & Results Section -->
 <div id="graphs-content" class="content-section">
   <div class="content-card">
-    <h2>Graphs & Results</h2>
-    <p>The analysis reveals persistent disparities between neighborhoods with different historical HOLC grades across multiple dimensions of infrastructure and opportunity. <strong>Click on the circles below to learn more about each dimension.</strong></p>
+    <h2>Findings</h2>
+    <div class="policy-box">
+      <h3>Summary</h3>
+      <ul>
+        <li><strong>Disinvestment:</strong> Formerly redlined areas have the lowest median housing values, reducing tax revenue and limiting infrastructure funding</li>
+        <li><strong>Persistent Racial Disparities:</strong> These areas still have higher concentrations of Hispanic and Black residents, reflecting lasting segregation</li>
+        <li><strong>Infrastructure Deficits:</strong> Fewer street trees contribute to higher temperatures, while limited broadband access restricts economic opportunities</li>
+        <li><strong>Environmental Burdens:</strong> Historically redlined areas have more exposure to pollution sources and less access to green space</li>
+      </ul>
+    </div>
+    <h3><strong>Click on the circles below to learn more about each dimension of inequality.</strong></h3>
+
 
     <!-- Updated Circles Visualization with Central Circle -->
     <div class="circles-vis">
-      <div class="central-circle">
-        Redlining Impact Analysis
-      </div>
-      <div class="satellite-circle" style="width: 120px; height: 120px; background: rgba(66, 133, 244, 0.7); top: 50px; left: calc(50% - 160px);" data-category="broadband">
+      <div class="satellite-circle" style="width: 130px; height: 130px; background: rgba(66, 133, 244, 0.7); top: 50px; left: calc(50% - 160px);" data-category="broadband">
         Broadband Access
       </div>
-      <div class="satellite-circle" style="width: 120px; height: 120px; background: rgba(52, 168, 83, 0.7); top: 50px; right: calc(50% - 160px);" data-category="green">
+      <div class="satellite-circle" style="width: 130px; height: 130px; background: rgba(52, 168, 83, 0.7); top: 50px; right: calc(50% - 160px);" data-category="green">
         Green Infrastructure
       </div>
-      <div class="satellite-circle" style="width: 120px; height: 120px; background: rgba(251, 188, 5, 0.7); bottom: 50px; left: calc(50% - 160px);" data-category="housing">
+      <div class="satellite-circle" style="width: 130px; height: 130px; background: rgba(251, 188, 5, 0.7); bottom: 50px; left: calc(50% - 160px);" data-category="housing">
         Housing Values
       </div>
-      <div class="satellite-circle" style="width: 120px; height: 120px; background: rgba(234, 67, 53, 0.7); bottom: 50px; right: calc(50% - 160px);" data-category="demographics">
+      <div class="satellite-circle" style="width: 130px; height: 130px; background: rgba(234, 67, 53, 0.7); bottom: 50px; right: calc(50% - 160px);" data-category="demographics">
         Racial Demographics
+      </div>
+      <div class="central-circle">
+        Redlining Impact Analysis
       </div>
     </div>
   </div>
@@ -766,16 +777,6 @@
   <div class="content-card">
     <h2>Policy Implications</h2>
     <p>The research findings demonstrate that historical redlining continues to shape contemporary inequality in San Jose. Addressing these disparities requires targeted policy interventions.</p>
-
-    <div class="policy-box">
-      <h3>Key Findings</h3>
-      <ul>
-        <li><strong>Disinvestment:</strong> Formerly redlined areas have the lowest median housing values, reducing tax revenue and limiting infrastructure funding</li>
-        <li><strong>Persistent Racial Disparities:</strong> These areas still have higher concentrations of Hispanic and Black residents, reflecting lasting segregation</li>
-        <li><strong>Infrastructure Deficits:</strong> Fewer street trees contribute to higher temperatures, while limited broadband access restricts economic opportunities</li>
-        <li><strong>Environmental Burdens:</strong> Historically redlined areas have more exposure to pollution sources and less access to green space</li>
-      </ul>
-    </div>
 
     <h3>Policy Recommendations</h3>
 
@@ -858,95 +859,112 @@
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
       <h3>Additional Information</h3>
       <p><strong>Researcher:</strong> Aditya Rajesh</p>
-      <p><strong>Email:</strong> the.aditya.rajesh@gmail.com</p>
+      <p><strong>Email:</strong> <a href = "mailto:the.aditya.rajesh@gmail.com" target="_blank">the.aditya.rajesh@gmail.com</a></p>
+      <p><strong>Linkedin:</strong> <a href="https://www.linkedin.com/in/aditya-rajesh-5815842a9/" target="_blank">Click here</a></p>
     </div>
   </div>
 </div>
 
-<!-- Tutorial Modal -->
+<!-- Tutorial Modal (UPDATED) -->
 <div id="tutorial-modal" class="modal">
   <div class="modal-content">
     <span class="close-modal">&times;</span>
-    <h2>Understanding Redlining in San Jose: Website Guide</h2>
 
-    <h3>What You're Seeing</h3>
-    <p>This interactive map shows the historical redlining zones in San Jose overlaid with contemporary data on infrastructure, demographics, and housing values.</p>
+    <h2 style="margin-top:0;">Website Quick Guide</h2>
 
-    <div style="display: flex; align-items: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
-      <div style="display: flex; align-items: center;">
-        <span class="swatch" style="background:#2ca25f; margin-right: 8px;"></span>
-        <span><strong>A (Green)</strong> - "Best"</span>
+    <!-- Short intro moved directly under heading -->
+    <p style="margin-top:6px; margin-bottom:18px; font-size:14px; color:#333;">
+      This interactive map shows how historical redlining practices continue to affect San José neighborhoods today.
+    </p>
+
+    <!-- How to use the map: intentionally placed grid -->
+    <h3 style="margin-bottom:10px;">How to Use the Map</h3>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, auto); grid-gap:12px;
+                grid-template-areas: 'click zoom' 'hover layers'; margin-bottom:18px;">
+      <!-- Click card (left-top) -->
+      <div style="grid-area: click; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#1a2a6c; color:white; font-size:20px;">
+          <i class="fas fa-mouse-pointer" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; margin-bottom:6px;">Click a zone</div>
+          <div style="font-size:13px; color:#444;">Click any colored zone to open a popup with detailed metrics and charts for that area.</div>
+        </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <span class="swatch" style="background:#1f78b4; margin-right: 8px;"></span>
-        <span><strong>B (Blue)</strong> - "Still Desirable"</span>
+
+      <!-- Zoom & Home (right-top) -->
+      <div style="grid-area: zoom; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#f1c40f; color:white; font-size:20px;">
+          <i class="fas fa-search-plus" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; margin-bottom:6px;">Zoom & Home</div>
+          <div style="font-size:13px; color:#444;">
+            Use the <strong>+</strong> / <strong>−</strong> buttons to zoom in/out. Click the <strong>Home</strong> button (house icon) to reset the map to the city center.
+          </div>
+        </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <span class="swatch" style="background:#f1c40f; margin-right: 8px;"></span>
-        <span><strong>C (Yellow)</strong> - "Declining"</span>
+
+      <!-- Hover (left-bottom) -->
+      <div style="grid-area: hover; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#2a4b8c; color:white; font-size:20px;">
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; margin-bottom:6px;">Hover for quick info</div>
+          <div style="font-size:13px; color:#444;">Hovering over a zone updates the small info panel — a fast way to compare areas without clicking.</div>
+        </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <span class="swatch" style="background:#e34a33; margin-right: 8px;"></span>
-        <span><strong>D (Red)</strong> - "Hazardous"</strong></span>
+
+      <!-- Layers (right-bottom) -->
+      <div style="grid-area: layers; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#4CAF50; color:white; font-size:20px;">
+          <i class="fas fa-layer-group" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; margin-bottom:6px;">Toggle layers</div>
+          <div style="font-size:13px; color:#444;">Use the layer controls to toggle HOLC zones, rail, light rail, and broadband anchors for different comparisons.</div>
+        </div>
       </div>
     </div>
 
-    <h3>How to Use This Website</h3>
+    <!-- Explore Further: tab-focused simple guide (different formatting) -->
+    <h3 style="margin-bottom:8px;">Explore Further (use the tabs above)</h3>
+    <div style="padding:12px 14px; border-radius:8px; background:#f7fbff; border:1px solid #e6f0fb; color:#123;">
+      <p style="margin:0 0 8px 0; font-size:14px;">
+        Use the tabs at the top of the page to navigate the site. Each tab focuses on a different part of the research:
+      </p>
 
-    <div class="chart-grid">
-      <div>
-        <h4>Exploring the Map</h4>
-        <ul>
-          <li>Click on any colored zone to see detailed information</li>
-          <li>Use the + and - buttons to zoom in and out</li>
-          <li>Toggle different layers on and off using the layer controls</li>
-          <li>Hover over zones to see basic information</li>
-        </ul>
-      </div>
+      <ul style="margin:6px 0 0 20px; font-size:13px; color:#234;">
+        <li style="margin-bottom:6px;"><strong>Map</strong> — Interactive map with HOLC overlays and infrastructure layers (default view).</li>
+        <li style="margin-bottom:6px;"><strong>What is Redlining</strong> — Short historical background and glossary to help understand the map.</li>
+        <li style="margin-bottom:6px;"><strong>Study Methodology</strong> — Data sources, GIS methods, and how metrics were computed.</li>
+        <li style="margin-bottom:6px;"><strong>Findings</strong> — Visual summaries and interactive charts of key findings (click the circles to open details).</li>
+        <li style="margin-bottom:6px;"><strong>Policy Implications</strong> — Short, actionable recommendations for equitable investment in San José.</li>
+        <li style="margin-bottom:6px;"><strong>Contact</strong> — Embedded form and contact info for follow-ups or collaboration.</li>
+      </ul>
 
-      <div>
-        <h4>Understanding the Data</h4>
-        <ul>
-          <li>Each zone shows historical HOLC grade and contemporary data</li>
-          <li>Compare infrastructure across different zones</li>
-          <li>Note patterns between historical redlining and current conditions</li>
-        </ul>
-      </div>
-
-      <div>
-        <h4>Navigating the Sections</h4>
-        <ul>
-          <li>Use the tabs at the top to explore different aspects of the research</li>
-          <li>The Graphs & Results section visualizes key findings</li>
-          <li>Policy Implications suggests actions to address disparities</li>
-        </ul>
-      </div>
-
-      <div>
-        <h4>Taking Action</h4>
-        <ul>
-          <li>Contact us with questions or feedback</li>
-          <li>Share this resource with others</li>
-          <li>Consider how you might address these issues in your community</li>
-        </ul>
-      </div>
+      <p style="margin-top:10px; font-size:13px; color:#444;">
+        Tip: if you want to share a specific figure or district, switch to the appropriate tab and then use the map or charts to capture the exact view before sharing.
+      </p>
     </div>
 
-    <h3>Key Variables Analyzed</h3>
-    <p>This research examines multiple dimensions of inequality across historically redlined neighborhoods:</p>
-    <ul>
-      <li><strong>Broadband Access:</strong> Internet infrastructure and connectivity</li>
-      <li><strong>Green Infrastructure:</strong> Street trees, parks, and green space</li>
-      <li><strong>Transportation:</strong> Public transit access and rail infrastructure</li>
-      <li><strong>Housing Values:</strong> Current property values and trends</li>
-      <li><strong>Demographics:</strong> Racial composition and segregation patterns</li>
-    </ul>
-
-    <div style="text-align: center; margin-top: 30px;">
+    <div style="text-align:center; margin-top:18px;">
       <button class="submit-btn" id="start-exploring">Start Exploring</button>
     </div>
   </div>
 </div>
+
+
 
 <!-- Fullscreen Details Modal -->
 <div id="fullscreen-modal" class="modal">
