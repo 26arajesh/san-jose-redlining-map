@@ -865,7 +865,7 @@
   </div>
 </div>
 
-<!-- Tutorial Modal (REPLACEMENT) -->
+<!-- Tutorial Modal (UPDATED) -->
 <div id="tutorial-modal" class="modal">
   <div class="modal-content">
     <span class="close-modal">&times;</span>
@@ -877,84 +877,85 @@
       This interactive map shows how historical redlining practices continue to affect San José neighborhoods today.
     </p>
 
-    <!-- How to use the map: visual icon grid -->
-    <h3 style="margin-bottom:8px;">How to Use the Map</h3>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:18px;">
-      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-        <div style="flex:0 0 44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#1a2a6c; color:white; font-size:18px;">
+    <!-- How to use the map: intentionally placed grid -->
+    <h3 style="margin-bottom:10px;">How to Use the Map</h3>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(2, auto); grid-gap:12px;
+                grid-template-areas: 'click zoom' 'hover layers'; margin-bottom:18px;">
+      <!-- Click card (left-top) -->
+      <div style="grid-area: click; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#1a2a6c; color:white; font-size:20px;">
           <i class="fas fa-mouse-pointer" aria-hidden="true"></i>
         </div>
         <div>
           <div style="font-weight:700; margin-bottom:6px;">Click a zone</div>
-          <div style="font-size:13px; color:#444;">Click any colored zone for detailed information about that area.</div>
+          <div style="font-size:13px; color:#444;">Click any colored zone to open a popup with detailed metrics and charts for that area.</div>
         </div>
       </div>
 
-      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-        <div style="flex:0 0 44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#2a4b8c; color:white; font-size:18px;">
-          <i class="fas fa-info-circle" aria-hidden="true"></i>
-        </div>
-        <div>
-          <div style="font-weight:700; margin-bottom:6px;">Hover for quick info</div>
-          <div style="font-size:13px; color:#444;">Hover over zones to see a short summary in the info panel.</div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-        <div style="flex:0 0 44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#f1c40f; color:white; font-size:18px;">
+      <!-- Zoom & Home (right-top) -->
+      <div style="grid-area: zoom; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#f1c40f; color:white; font-size:20px;">
           <i class="fas fa-search-plus" aria-hidden="true"></i>
         </div>
         <div>
           <div style="font-weight:700; margin-bottom:6px;">Zoom & Home</div>
-          <div style="font-size:13px; color:#444;">Use the <strong>+/–</strong> buttons to zoom. Click the <strong>Home</strong> button to reset the map view.</div>
+          <div style="font-size:13px; color:#444;">
+            Use the <strong>+</strong> / <strong>−</strong> buttons to zoom in/out. Click the <strong>Home</strong> button (house icon) to reset the map to the city center.
+          </div>
         </div>
       </div>
 
-      <div style="display:flex; gap:12px; align-items:flex-start; padding:12px; border-radius:8px; background:#f8f9fa; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-        <div style="flex:0 0 44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#4CAF50; color:white; font-size:18px;">
+      <!-- Hover (left-bottom) -->
+      <div style="grid-area: hover; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#2a4b8c; color:white; font-size:20px;">
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; margin-bottom:6px;">Hover for quick info</div>
+          <div style="font-size:13px; color:#444;">Hovering over a zone updates the small info panel — a fast way to compare areas without clicking.</div>
+        </div>
+      </div>
+
+      <!-- Layers (right-bottom) -->
+      <div style="grid-area: layers; display:flex; gap:12px; align-items:flex-start; padding:14px; border-radius:10px;
+                  background:#fff; box-shadow:0 6px 18px rgba(10,20,40,0.06);">
+        <div style="flex:0 0 52px; height:52px; display:flex; align-items:center; justify-content:center;
+                    border-radius:10px; background:#4CAF50; color:white; font-size:20px;">
           <i class="fas fa-layer-group" aria-hidden="true"></i>
         </div>
         <div>
           <div style="font-weight:700; margin-bottom:6px;">Toggle layers</div>
-          <div style="font-size:13px; color:#444;">Turn map layers on or off (rail, broadband, HOLC zones) to compare different datasets.</div>
+          <div style="font-size:13px; color:#444;">Use the layer controls to toggle HOLC zones, rail, light rail, and broadband anchors for different comparisons.</div>
         </div>
       </div>
     </div>
 
-    <!-- Explore Further: visual cards -->
-    <h3 style="margin-bottom:8px;">Explore Further</h3>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:18px;">
-      <div style="padding:14px; border-radius:8px; background:white; box-shadow:0 2px 6px rgba(0,0,0,0.04); text-align:center;">
-        <div style="width:44px;height:44px;border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#2a4b8c;color:white;font-size:18px;">
-          <i class="fas fa-book" aria-hidden="true"></i>
-        </div>
-        <div style="font-weight:700;margin-bottom:6px;">Background</div>
-        <div style="font-size:13px;color:#555;">Short history of redlining and the HOLC maps used in this study.</div>
-      </div>
+    <!-- Explore Further: tab-focused simple guide (different formatting) -->
+    <h3 style="margin-bottom:8px;">Explore Further (use the tabs above)</h3>
+    <div style="padding:12px 14px; border-radius:8px; background:#f7fbff; border:1px solid #e6f0fb; color:#123;">
+      <p style="margin:0 0 8px 0; font-size:14px;">
+        Use the tabs at the top of the page to navigate the site. Each tab focuses on a different part of the research:
+      </p>
 
-      <div style="padding:14px; border-radius:8px; background:white; box-shadow:0 2px 6px rgba(0,0,0,0.04); text-align:center;">
-        <div style="width:44px;height:44px;border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#1a2a6c;color:white;font-size:18px;">
-          <i class="fas fa-chart-bar" aria-hidden="true"></i>
-        </div>
-        <div style="font-weight:700;margin-bottom:6px;">Research & Results</div>
-        <div style="font-size:13px;color:#555;">Key findings, charts, and the circles visualization summarizing disparities.</div>
-      </div>
+      <ul style="margin:6px 0 0 20px; font-size:13px; color:#234;">
+        <li style="margin-bottom:6px;"><strong>Map</strong> — Interactive map with HOLC overlays and infrastructure layers (default view).</li>
+        <li style="margin-bottom:6px;"><strong>What is Redlining</strong> — Short historical background and glossary to help understand the map.</li>
+        <li style="margin-bottom:6px;"><strong>Study Methodology</strong> — Data sources, GIS methods, and how metrics were computed.</li>
+        <li style="margin-bottom:6px;"><strong>Findings</strong> — Visual summaries and interactive charts of key findings (click the circles to open details).</li>
+        <li style="margin-bottom:6px;"><strong>Policy Implications</strong> — Short, actionable recommendations for equitable investment in San José.</li>
+        <li style="margin-bottom:6px;"><strong>Contact</strong> — Embedded form and contact info for follow-ups or collaboration.</li>
+      </ul>
 
-      <div style="padding:14px; border-radius:8px; background:white; box-shadow:0 2px 6px rgba(0,0,0,0.04); text-align:center;">
-        <div style="width:44px;height:44px;border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#e34a33;color:white;font-size:18px;">
-          <i class="fas fa-bullhorn" aria-hidden="true"></i>
-        </div>
-        <div style="font-weight:700;margin-bottom:6px;">Policy Implications</div>
-        <div style="font-size:13px;color:#555;">Summary of recommended actions for equitable investments and reparative policies.</div>
-      </div>
-
-      <div style="padding:14px; border-radius:8px; background:white; box-shadow:0 2px 6px rgba(0,0,0,0.04); text-align:center;">
-        <div style="width:44px;height:44px;border-radius:8px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#2ca25f;color:white;font-size:18px;">
-          <i class="fas fa-envelope" aria-hidden="true"></i>
-        </div>
-        <div style="font-weight:700;margin-bottom:6px;">Contact</div>
-        <div style="font-size:13px;color:#555;">Find collaboration contacts and use the embedded form to get in touch.</div>
-      </div>
+      <p style="margin-top:10px; font-size:13px; color:#444;">
+        Tip: if you want to share a specific figure or district, switch to the appropriate tab and then use the map or charts to capture the exact view before sharing.
+      </p>
     </div>
 
     <div style="text-align:center; margin-top:18px;">
@@ -962,6 +963,7 @@
     </div>
   </div>
 </div>
+
 
 
 <!-- Fullscreen Details Modal -->
