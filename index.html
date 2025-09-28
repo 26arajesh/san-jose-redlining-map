@@ -595,6 +595,7 @@
       <label><input type="checkbox" id="toggle-rail"> Rail</label>
       <label><input type="checkbox" id="toggle-light-rail"> Light Rail</label>
       <label><input type="checkbox" id="toggle-broadband"> Broadband Anchors</label>
+      <label><input type="checkbox" id="toggle-dacs"> DACs</label>
     </div>
 
     <div id="info">Click on a zone for more info</div>
@@ -1369,6 +1370,38 @@
         }
       });
 
+      // State Defined DACs
+      map.addSource('dacs', {
+        type: 'geojson',
+        data: 'https://api.maptiler.com/data/01998e9c-219b-70a8-a475-3dc8a6dd4418/features.json?key=PrTVbrUk3PBatpAWhyvh'
+      });
+
+      map.addLayer({
+        id: 'dacs',
+        type: 'fill',
+        source: 'dacs',
+        layout: {
+          visibility: 'none'
+        },
+        paint: {
+          'fill-color': '#3498db',       // Blue color
+          'fill-opacity': 0.4,           // Slightly transparent
+          'fill-outline-color': '#ffffff' // White border
+        }
+      });
+
+      // Outline layer (for thicker borders)
+      map.addLayer({
+        id: 'dacs-outline',
+        type: 'line',
+        source: 'dacs',
+        layout: { visibility: 'none' },
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': 2 // increase this for thicker outline
+        }
+      });
+
       const popup = new maplibregl.Popup({
         closeButton: true,
         closeOnClick: true,
@@ -1448,6 +1481,12 @@
       document.getElementById('toggle-broadband').onchange = (e) => {
         const v = e.target.checked ? 'visible' : 'none';
         map.setLayoutProperty('broadband-anchors-point', 'visibility', v);
+      };
+
+      document.getElementById('toggle-dacs').onchange = (e) => {
+        const v = e.target.checked ? 'visible' : 'none';
+        map.setLayoutProperty('dacs', 'visibility', v);
+        map.setLayoutProperty('dacs-outline', 'visibility', v);
       };
     });
   }
