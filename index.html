@@ -1256,7 +1256,7 @@
     const map = new maplibregl.Map({
       container: 'map',
       style,
-      center: [-121.8863, 37.3382],
+      center: [-121.8863, 37.3275],
       zoom: 12
     });
     window._map = map;
@@ -1273,7 +1273,7 @@
     // Add home button functionality
     document.getElementById('home-btn').addEventListener('click', () => {
       map.flyTo({
-        center: [-121.8863, 37.3382],
+        center: [-121.8863, 37.3275],
         zoom: 12,
         essential: true
       });
