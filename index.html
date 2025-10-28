@@ -592,6 +592,7 @@
   <div id="sidebar">
     <div id="layer-controls">
       <label><input type="checkbox" id="toggle-holc" checked> HOLC Zones</label>
+      <label><input type="checkbox" id="toggle-no2"> NO₂ Levels</label>  <!-- ADD THIS LINE -->
       <label><input type="checkbox" id="toggle-rail"> Rail</label>
       <label><input type="checkbox" id="toggle-light-rail"> Light Rail</label>
       <label><input type="checkbox" id="toggle-broadband"> Broadband Anchors</label>
@@ -611,6 +612,16 @@
     <div class="row"><span class="swatch" style="background:#1f78b4"></span>B - Still Desirable</div>
     <div class="row"><span class="swatch" style="background:#f1c40f"></span>C - Declining</div>
     <div class="row"><span class="swatch" style="background:#e34a33"></span>D - Hazardous</div>
+    <!-- Add this right after the D - Hazardous line, before closing </div> of legend -->
+    <div id="no2-legend" style="display:none; margin-top:16px; padding-top:12px; border-top:1px solid #ddd;">
+      <div style="font-weight:600; margin-bottom:8px;">NO₂ Concentration</div>
+      <div style="width:100%; height:20px; background:linear-gradient(to right, #2ca25f, #f1c40f, #e34a33); border-radius:3px; margin:8px 0;"></div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#666;">
+        <span>Low</span>
+        <span>High</span>
+      </div>
+      <div style="font-size:10px; color:#666; margin-top:4px;">molecules/cm²</div>
+    </div>
   </div>
 </div>
 
@@ -1402,6 +1413,27 @@
         }
       });
 
+      // NO2 Raster Layer - with reprojection
+      map.addSource('no2-raster', {
+        type: 'raster',
+        tiles: [
+          'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?url=https://raw.githubusercontent.com/26arajesh/san-jose-redlining-map/dev/no2_summerwinter.tif&rescale=1.15e15,5.64e15&colormap_name=rdylgn_r&resampling=nearest'
+        ],
+        tileSize: 256,
+        attribution: 'NO₂ Data'
+      });
+
+      map.addLayer({
+        id: 'no2-layer',
+        type: 'raster',
+        source: 'no2-raster',
+        layout: { visibility: 'none' },
+        paint: {
+          'raster-opacity': 0.7,
+          'raster-resampling': 'nearest'  // Keep pixels sharp
+        }
+      });
+
       const popup = new maplibregl.Popup({
         closeButton: true,
         closeOnClick: true,
@@ -1488,8 +1520,15 @@
         map.setLayoutProperty('dacs', 'visibility', v);
         map.setLayoutProperty('dacs-outline', 'visibility', v);
       };
+
+      document.getElementById('toggle-no2').onchange = (e) => {
+        const v = e.target.checked ? 'visible' : 'none';
+        map.setLayoutProperty('no2-layer', 'visibility', v);
+        document.getElementById('no2-legend').style.display = e.target.checked ? 'block' : 'none';
+      };
     });
   }
+
 
   init();
 </script>
