@@ -593,6 +593,8 @@
     <div id="layer-controls">
       <label><input type="checkbox" id="toggle-holc" checked> HOLC Zones</label>
       <label><input type="checkbox" id="toggle-no2"> NO₂ Levels</label>  <!-- ADD THIS LINE -->
+      <label><input type="checkbox" id="toggle-o3"> O₃ (Ozone)</label>
+      <label><input type="checkbox" id="toggle-hcho"> HCHO (Formaldehyde)</label>
       <label><input type="checkbox" id="toggle-rail"> Rail</label>
       <label><input type="checkbox" id="toggle-light-rail"> Light Rail</label>
       <label><input type="checkbox" id="toggle-broadband"> Broadband Anchors</label>
@@ -616,6 +618,25 @@
     <div id="no2-legend" style="display:none; margin-top:16px; padding-top:12px; border-top:1px solid #ddd;">
       <div style="font-weight:600; margin-bottom:8px;">NO₂ Concentration</div>
       <div style="width:100%; height:20px; background:linear-gradient(to right, #2ca25f, #f1c40f, #e34a33); border-radius:3px; margin:8px 0;"></div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#666;">
+        <span>Low</span>
+        <span>High</span>
+      </div>
+      <div style="font-size:10px; color:#666; margin-top:4px;">molecules/m²</div>
+    </div>
+    <div id="o3-legend" style="display:none; margin-top:16px; padding-top:12px; border-top:1px solid #ddd;">
+      <div style="font-weight:600; margin-bottom:8px;">O₃ (Ozone) Levels</div>
+      <div style="width:100%; height:20px; background:linear-gradient(to right, #4575b4, #fee090, #d73027); border-radius:3px; margin:8px 0;"></div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#666;">
+        <span>Low</span>
+        <span>High</span>
+      </div>
+      <div style="font-size:10px; color:#666; margin-top:4px;">Dobson Units</div>
+    </div>
+
+    <div id="hcho-legend" style="display:none; margin-top:16px; padding-top:12px; border-top:1px solid #ddd;">
+      <div style="font-weight:600; margin-bottom:8px;">HCHO (Formaldehyde)</div>
+      <div style="width:100%; height:20px; background:linear-gradient(to right, #fee5d9, #fb6a4a, #a50f15); border-radius:3px; margin:8px 0;"></div>
       <div style="display:flex; justify-content:space-between; font-size:11px; color:#666;">
         <span>Low</span>
         <span>High</span>
@@ -1433,6 +1454,47 @@
           'raster-resampling': 'nearest'  // Keep pixels sharp
         }
       });
+      // O3 (Ozone) Raster Layer
+      map.addSource('o3-raster', {
+        type: 'raster',
+        tiles: [
+          'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?url=https://raw.githubusercontent.com/26arajesh/san-jose-redlining-map/main/SanJose_O3_SeasonalAvg2025.tif&rescale=0.137988,0.139198&colormap_name=rdylbu_r&resampling=nearest'
+        ],
+        tileSize: 256,
+        attribution: 'O₃ Data'
+      });
+
+      map.addLayer({
+        id: 'o3-layer',
+        type: 'raster',
+        source: 'o3-raster',
+        layout: { visibility: 'none' },
+        paint: {
+          'raster-opacity': 0.7,
+          'raster-resampling': 'nearest'
+        }
+      });
+
+// HCHO (Formaldehyde) Raster Layer
+      map.addSource('hcho-raster', {
+        type: 'raster',
+        tiles: [
+          'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?url=https://raw.githubusercontent.com/26arajesh/san-jose-redlining-map/main/SanJose_HCHO_SeasonalAvg2025.tif&rescale=3.2e15,7.1e15&colormap_name=reds&resampling=nearest'
+        ],
+        tileSize: 256,
+        attribution: 'HCHO Data'
+      });
+
+      map.addLayer({
+        id: 'hcho-layer',
+        type: 'raster',
+        source: 'hcho-raster',
+        layout: { visibility: 'none' },
+        paint: {
+          'raster-opacity': 0.7,
+          'raster-resampling': 'nearest'
+        }
+      });
 
       const popup = new maplibregl.Popup({
         closeButton: true,
@@ -1525,6 +1587,16 @@
         const v = e.target.checked ? 'visible' : 'none';
         map.setLayoutProperty('no2-layer', 'visibility', v);
         document.getElementById('no2-legend').style.display = e.target.checked ? 'block' : 'none';
+      };
+      document.getElementById('toggle-o3').onchange = (e) => {
+        const v = e.target.checked ? 'visible' : 'none';
+        map.setLayoutProperty('o3-layer', 'visibility', v);
+        document.getElementById('o3-legend').style.display = e.target.checked ? 'block' : 'none';
+      };
+      document.getElementById('toggle-hcho').onchange = (e) => {
+        const v = e.target.checked ? 'visible' : 'none';
+        map.setLayoutProperty('hcho-layer', 'visibility', v);
+        document.getElementById('hcho-legend').style.display = e.target.checked ? 'block' : 'none';
       };
     });
   }
